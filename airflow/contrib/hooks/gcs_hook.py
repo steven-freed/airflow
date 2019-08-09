@@ -175,7 +175,31 @@ class GoogleCloudStorageHook(GoogleCloudBaseHook):
 
         return blob.download_as_string()
 
-    def upload(self, bucket_name, object_name, filename,
+    def upload_from_string(self, bucket_name, object_name, data,
+               mime_type='text/plain'):
+         """
+        Uploads a string or bytes from a file to Google Cloud Storage.
+
+        :param bucket_name: The bucket to upload to.
+        :type bucket_name: str
+        :param object_name: The object name to set when uploading the local file.
+        :type object_name: str
+        :param data: The local file path to the file to be uploaded.
+        :type data: str
+        :param mime_type: The MIME type to set when uploading the file.
+        :type mime_type: str
+        """
+        
+        client = self.get_conn()
+        bucket = client.get_bucket(bucket_name)
+        blob = bucket.blob(blob_name=object_name)
+        blob.upload_from_string(data, content_type=mime_type)
+
+        self.log.info('Data Stream uploaded to %s in %s bucket', filename, object_name, bucket_name)
+
+
+
+    def upload_from_filename(self, bucket_name, object_name, filename,
                mime_type='application/octet-stream', gzip=False):
         """
         Uploads a local file to Google Cloud Storage.
