@@ -195,9 +195,7 @@ class GoogleCloudStorageHook(GoogleCloudBaseHook):
         blob = bucket.blob(blob_name=object_name)
         blob.upload_from_string(data, content_type=mime_type)
 
-        self.log.info('Data Stream uploaded to %s in %s bucket', filename, object_name, bucket_name)
-
-
+        self.log.info('Data stream uploaded to %s in %s bucket', object_name, bucket_name)
 
     def upload_from_filename(self, bucket_name, object_name, filename,
                mime_type='application/octet-stream', gzip=False):
