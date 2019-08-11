@@ -176,7 +176,8 @@ class GoogleCloudStorageHook(GoogleCloudBaseHook):
         return blob.download_as_string()
 
     def upload(self, bucket_name, object_name, filename=None,
-               data=None, mime_type=None, gzip=False):
+               data=None, mime_type=None, gzip=False,
+               multipart=None, num_retries=None):
         """
         Uploads a local file or file content as string or bytes to Google Cloud Storage.
 
@@ -193,7 +194,13 @@ class GoogleCloudStorageHook(GoogleCloudBaseHook):
         :param gzip: Option to compress local file for upload
         :type gzip: bool
         """
+        if multipart is not None:
+            warnings.warn("'multipart' parameter is deprecated."
+                          " It is handled automatically by the Storage client", DeprecationWarning)
 
+        if num_retries is not None:
+            warnings.warn("'num_retries' parameter is deprecated."
+                          " It is handled automatically by the Storage client", DeprecationWarning)
         client = self.get_conn()
         bucket = client.get_bucket(bucket_name)
         blob = bucket.blob(blob_name=object_name)
