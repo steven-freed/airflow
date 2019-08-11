@@ -196,7 +196,7 @@ class GoogleCloudStorageHook(GoogleCloudBaseHook):
 
         client = self.get_conn()
         bucket = client.get_bucket(bucket_name)
-        blob = bucket.blob(blob_name=object_name)        
+        blob = bucket.blob(blob_name=object_name)
         if filename and data:
             raise Exception("""'filename' and 'data' parameter provided. Please
                             specify a single parameter, either 'filename' for
