@@ -223,7 +223,7 @@ class GoogleCloudStorageHook(GoogleCloudBaseHook):
             if not mime_type:
                 mime_type = 'text/plain'
             if gzip:
-                if type(data) != bytes:
+                if isinstance(data, str):
                     data = bytes(data, encoding)
                 out = BytesIO()
                 with gz.GzipFile(fileobj=out, mode="w") as f:
