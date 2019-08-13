@@ -180,7 +180,7 @@ class GoogleCloudStorageHook(GoogleCloudBaseHook):
                data=None, mime_type=None, gzip=False):
         """
         Uploads a local file or file data as string or bytes to Google Cloud Storage.
-        
+
         :param bucket_name: The bucket to upload to.
         :type bucket_name: str
         :param object_name: The object name to set when uploading the file.
