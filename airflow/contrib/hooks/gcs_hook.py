@@ -24,6 +24,7 @@ This module contains a Google Cloud Storage hook.
 import gzip as gz
 import os
 import shutil
+from io import StringIO
 
 from urllib.parse import urlparse
 from google.cloud import storage
@@ -176,31 +177,23 @@ class GoogleCloudStorageHook(GoogleCloudBaseHook):
         return blob.download_as_string()
 
     def upload(self, bucket_name, object_name, filename=None,
-               data=None, mime_type=None, gzip=False,
-               multipart=None, num_retries=None):
+               data=None, mime_type=None, gzip=False):
         """
-        Uploads a local file or file content as string or bytes to Google Cloud Storage.
+        Uploads a local file or file data as string or bytes to Google Cloud Storage.
 
         :param bucket_name: The bucket to upload to.
         :type bucket_name: str
-        :param object_name: The object name to set when uploading the local file.
+        :param object_name: The object name to set when uploading the file.
         :type object_name: str
         :param filename: The local file path to the file to be uploaded.
         :type filename: str
-        :param data: The file's content as a string or bytes to be uploaded.
+        :param data: The file's data as a string or bytes to be uploaded.
         :type data: str
         :param mime_type: The MIME type to set when uploading the file.
         :type mime_type: str
-        :param gzip: Option to compress local file for upload
+        :param gzip: Option to compress local file or file data for upload
         :type gzip: bool
         """
-        if multipart is not None:
-            warnings.warn("'multipart' parameter is deprecated."
-                          " It is handled automatically by the Storage client", DeprecationWarning)
-
-        if num_retries is not None:
-            warnings.warn("'num_retries' parameter is deprecated."
-                          " It is handled automatically by the Storage client", DeprecationWarning)
         client = self.get_conn()
         bucket = client.get_bucket(bucket_name)
         blob = bucket.blob(blob_name=object_name)
@@ -227,7 +220,11 @@ class GoogleCloudStorageHook(GoogleCloudBaseHook):
         elif data:
             if not mime_type:
                 mime_type = 'text/plain'
-
+            if gzip:
+                out = StringIO.StringIO()
+                with gz.GzipFile(fileobj=out, mode="w") as f:
+                    f.write(data)
+                data = out.getvalue()
             blob.upload_from_string(data, content_type=mime_type)
             self.log.info('Data stream uploaded to %s in %s bucket', object_name, bucket_name)
         else:
