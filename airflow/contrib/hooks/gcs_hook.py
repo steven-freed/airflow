@@ -24,7 +24,7 @@ This module contains a Google Cloud Storage hook.
 import gzip as gz
 import os
 import shutil
-from io import StringIO
+from io import BytesIO
 
 from urllib.parse import urlparse
 from google.cloud import storage
@@ -177,7 +177,7 @@ class GoogleCloudStorageHook(GoogleCloudBaseHook):
         return blob.download_as_string()
 
     def upload(self, bucket_name, object_name, filename=None,
-               data=None, mime_type=None, gzip=False):
+               data=None, mime_type=None, gzip=False, encoding='utf-8'):
         """
         Uploads a local file or file data as string or bytes to Google Cloud Storage.
 
@@ -193,6 +193,8 @@ class GoogleCloudStorageHook(GoogleCloudBaseHook):
         :type mime_type: str
         :param gzip: Option to compress local file or file data for upload
         :type gzip: bool
+        :param encoding: bytes encoding for file data if provided as string
+        :type encoding: str
         """
         client = self.get_conn()
         bucket = client.get_bucket(bucket_name)
@@ -221,7 +223,9 @@ class GoogleCloudStorageHook(GoogleCloudBaseHook):
             if not mime_type:
                 mime_type = 'text/plain'
             if gzip:
-                out = StringIO()
+                if type(data) != bytes:
+                    data = bytes(data, encoding)
+                out = BytesIO()
                 with gz.GzipFile(fileobj=out, mode="w") as f:
                     f.write(data)
                 data = out.getvalue()
