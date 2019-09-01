@@ -628,18 +628,10 @@ class TestGoogleCloudStorageHookUpload(unittest.TestCase):
             .blob.return_value.upload_from_string
         upload_method.return_value = None
 
-        self.gcs_hook.upload(test_bucket,
-                             test_object)
-
         self.assertRaises(ValueError,
                           self.gcs_hook.upload,
                           test_bucket,
                           test_object)
-
-        self.gcs_hook.upload(test_bucket,
-                             test_object,
-                             filename=self.testfile.name,
-                             data=self.testdata_str)
 
         self.assertRaises(ValueError,
                           self.gcs_hook.upload,
