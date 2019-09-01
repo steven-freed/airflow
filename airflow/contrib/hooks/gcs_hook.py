@@ -176,11 +176,11 @@ class GoogleCloudStorageHook(GoogleCloudBaseHook):
 
         return blob.download_as_string()
 
+
     def upload(self, bucket_name, object_name, filename=None,
                data=None, mime_type=None, gzip=False, encoding='utf-8'):
         """
         Uploads a local file or file data as string or bytes to Google Cloud Storage.
-
         :param bucket_name: The bucket to upload to.
         :type bucket_name: str
         :param object_name: The object name to set when uploading the file.
@@ -200,7 +200,7 @@ class GoogleCloudStorageHook(GoogleCloudBaseHook):
         bucket = client.get_bucket(bucket_name)
         blob = bucket.blob(blob_name=object_name)
         if filename and data:
-            raise Exception("""'filename' and 'data' parameter provided. Please
+            raise ValueError("""'filename' and 'data' parameter provided. Please
                             specify a single parameter, either 'filename' for
                             local file uploads or 'data' for file content uploads.""")
         elif filename:
@@ -232,7 +232,7 @@ class GoogleCloudStorageHook(GoogleCloudBaseHook):
             blob.upload_from_string(data, content_type=mime_type)
             self.log.info('Data stream uploaded to %s in %s bucket', object_name, bucket_name)
         else:
-            raise Exception("""'filename' and 'data' parameter missing.
+            raise ValueError("""'filename' and 'data' parameter missing.
                             One is required to upload to gcs.""")
 
     def exists(self, bucket_name, object_name):
