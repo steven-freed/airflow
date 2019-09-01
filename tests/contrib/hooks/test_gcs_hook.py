@@ -593,8 +593,8 @@ class TestGoogleCloudStorageHookUpload(unittest.TestCase):
 
         self.assertIsNone(response)
         upload_method.assert_called_once_with(
-                data=self.testdata_str,
-                content_type='text/plain'
+            data=self.testdata_str,
+            content_type='text/plain'
         )
 
     @mock.patch(GCS_STRING.format('GoogleCloudStorageHook.get_conn'))

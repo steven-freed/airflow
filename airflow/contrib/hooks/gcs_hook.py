@@ -176,7 +176,6 @@ class GoogleCloudStorageHook(GoogleCloudBaseHook):
 
         return blob.download_as_string()
 
-
     def upload(self, bucket_name, object_name, filename=None,
                data=None, mime_type=None, gzip=False, encoding='utf-8'):
         """
