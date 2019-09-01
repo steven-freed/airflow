@@ -630,7 +630,7 @@ class TestGoogleCloudStorageHookUpload(unittest.TestCase):
 
         self.gcs_hook.upload(test_bucket,
                              test_object)
-        
+
         self.assertRaises(ValueError)
 
         self.gcs_hook.upload(test_bucket,
