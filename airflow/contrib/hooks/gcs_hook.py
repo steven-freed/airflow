@@ -21,6 +21,7 @@
 This module contains a Google Cloud Storage hook.
 """
 
+from typing import Optional
 import gzip as gz
 import os
 import shutil
@@ -39,7 +40,7 @@ class GoogleCloudStorageHook(GoogleCloudBaseHook):
     connection.
     """
 
-    _conn = None
+    _conn = None  # type: Optional[storage.Client]
 
     def __init__(self,
                  google_cloud_storage_conn_id='google_cloud_default',
@@ -52,7 +53,9 @@ class GoogleCloudStorageHook(GoogleCloudBaseHook):
         Returns a Google Cloud Storage service object.
         """
         if not self._conn:
-            self._conn = storage.Client(credentials=self._get_credentials(), client_info=self.client_info)
+            self._conn = storage.Client(credentials=self._get_credentials(),
+                                        client_info=self.client_info,
+                                        project=self.project_id)
 
         return self._conn
 
@@ -89,9 +92,9 @@ class GoogleCloudStorageHook(GoogleCloudBaseHook):
             raise ValueError('source_bucket and source_object cannot be empty.')
 
         client = self.get_conn()
-        source_bucket = client.get_bucket(source_bucket)
+        source_bucket = client.bucket(source_bucket)
         source_object = source_bucket.blob(source_object)
-        destination_bucket = client.get_bucket(destination_bucket)
+        destination_bucket = client.bucket(destination_bucket)
         destination_object = source_bucket.copy_blob(
             blob=source_object,
             destination_bucket=destination_bucket,
@@ -131,9 +134,9 @@ class GoogleCloudStorageHook(GoogleCloudBaseHook):
             raise ValueError('source_bucket and source_object cannot be empty.')
 
         client = self.get_conn()
-        source_bucket = client.get_bucket(source_bucket)
+        source_bucket = client.bucket(source_bucket)
         source_object = source_bucket.blob(blob_name=source_object)
-        destination_bucket = client.get_bucket(destination_bucket)
+        destination_bucket = client.bucket(destination_bucket)
 
         token, bytes_rewritten, total_bytes = destination_bucket.blob(
             blob_name=destination_object).rewrite(
@@ -167,7 +170,7 @@ class GoogleCloudStorageHook(GoogleCloudBaseHook):
         :type filename: str
         """
         client = self.get_conn()
-        bucket = client.get_bucket(bucket_name)
+        bucket = client.bucket(bucket_name)
         blob = bucket.blob(blob_name=object_name)
 
         if filename:
@@ -196,7 +199,7 @@ class GoogleCloudStorageHook(GoogleCloudBaseHook):
         :type encoding: str
         """
         client = self.get_conn()
-        bucket = client.get_bucket(bucket_name)
+        bucket = client.bucket(bucket_name)
         blob = bucket.blob(blob_name=object_name)
         if filename and data:
             raise ValueError("""'filename' and 'data' parameter provided. Please
@@ -245,7 +248,7 @@ class GoogleCloudStorageHook(GoogleCloudBaseHook):
         :type object_name: str
         """
         client = self.get_conn()
-        bucket = client.get_bucket(bucket_name)
+        bucket = client.bucket(bucket_name)
         blob = bucket.blob(blob_name=object_name)
         return blob.exists()
 
@@ -262,9 +265,12 @@ class GoogleCloudStorageHook(GoogleCloudBaseHook):
         :type ts: datetime.datetime
         """
         client = self.get_conn()
-        bucket = storage.Bucket(client=client, name=bucket_name)
+        bucket = client.bucket(bucket_name)
         blob = bucket.get_blob(blob_name=object_name)
-        blob.reload()
+
+        if blob is None:
+            raise ValueError("Object ({}) not found in Bucket ({})".format(
+                object_name, bucket_name))
 
         blob_update_time = blob.updated
 
@@ -291,7 +297,7 @@ class GoogleCloudStorageHook(GoogleCloudBaseHook):
         :type object_name: str
         """
         client = self.get_conn()
-        bucket = client.get_bucket(bucket_name)
+        bucket = client.bucket(bucket_name)
         blob = bucket.blob(blob_name=object_name)
         blob.delete()
 
@@ -315,7 +321,7 @@ class GoogleCloudStorageHook(GoogleCloudBaseHook):
         :return: a stream of object names matching the filtering criteria
         """
         client = self.get_conn()
-        bucket = client.get_bucket(bucket_name)
+        bucket = client.bucket(bucket_name)
 
         ids = []
         page_token = None
@@ -359,9 +365,8 @@ class GoogleCloudStorageHook(GoogleCloudBaseHook):
                       object_name,
                       bucket_name)
         client = self.get_conn()
-        bucket = client.get_bucket(bucket_name)
+        bucket = client.bucket(bucket_name)
         blob = bucket.get_blob(blob_name=object_name)
-        blob.reload()
         blob_size = blob.size
         self.log.info('The file size of %s is %s bytes.', object_name, blob_size)
         return blob_size
@@ -379,9 +384,8 @@ class GoogleCloudStorageHook(GoogleCloudBaseHook):
         self.log.info('Retrieving the crc32c checksum of '
                       'object_name: %s in bucket_name: %s', object_name, bucket_name)
         client = self.get_conn()
-        bucket = client.get_bucket(bucket_name)
+        bucket = client.bucket(bucket_name)
         blob = bucket.get_blob(blob_name=object_name)
-        blob.reload()
         blob_crc32c = blob.crc32c
         self.log.info('The crc32c checksum of %s is %s', object_name, blob_crc32c)
         return blob_crc32c
@@ -399,9 +403,8 @@ class GoogleCloudStorageHook(GoogleCloudBaseHook):
         self.log.info('Retrieving the MD5 hash of '
                       'object: %s in bucket: %s', object_name, bucket_name)
         client = self.get_conn()
-        bucket = client.get_bucket(bucket_name)
+        bucket = client.bucket(bucket_name)
         blob = bucket.get_blob(blob_name=object_name)
-        blob.reload()
         blob_md5hash = blob.md5_hash
         self.log.info('The md5Hash of %s is %s', object_name, blob_md5hash)
         return blob_md5hash
@@ -571,7 +574,7 @@ class GoogleCloudStorageHook(GoogleCloudBaseHook):
         self.log.info("Composing %s to %s in the bucket %s",
                       source_objects, destination_object, bucket_name)
         client = self.get_conn()
-        bucket = client.get_bucket(bucket_name)
+        bucket = client.bucket(bucket_name)
         destination_blob = bucket.blob(destination_object)
         destination_blob.compose(
             sources=[

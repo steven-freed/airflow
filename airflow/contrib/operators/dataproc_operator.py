@@ -121,6 +121,11 @@ class DataprocClusterCreateOperator(DataprocOperationBaseOperator):
         config files (e.g. spark-defaults.conf), see
         https://cloud.google.com/dataproc/docs/reference/rest/v1/projects.regions.clusters#SoftwareConfig
     :type properties: dict
+    :param optional_components: List of optional cluster components, for more info see
+        https://cloud.google.com/dataproc/docs/reference/rest/v1/ClusterConfig#Component
+    :type optional_components: list[str]
+    :param num_masters: The # of master nodes to spin up
+    :type num_masters: int
     :param master_machine_type: Compute engine machine type to use for the master node
     :type master_machine_type: str
     :param master_disk_type: Type of the boot disk for the master node
@@ -206,6 +211,8 @@ class DataprocClusterCreateOperator(DataprocOperationBaseOperator):
                  image_version=None,
                  autoscaling_policy=None,
                  properties=None,
+                 optional_components=None,
+                 num_masters=1,
                  master_machine_type='n1-standard-4',
                  master_disk_type='pd-standard',
                  master_disk_size=1024,
@@ -226,6 +233,7 @@ class DataprocClusterCreateOperator(DataprocOperationBaseOperator):
 
         super().__init__(project_id=project_id, region=region, *args, **kwargs)
         self.cluster_name = cluster_name
+        self.num_masters = num_masters
         self.num_workers = num_workers
         self.num_preemptible_workers = num_preemptible_workers
         self.storage_bucket = storage_bucket
@@ -236,6 +244,7 @@ class DataprocClusterCreateOperator(DataprocOperationBaseOperator):
         self.custom_image_project_id = custom_image_project_id
         self.image_version = image_version
         self.properties = properties or dict()
+        self.optional_components = optional_components
         self.master_machine_type = master_machine_type
         self.master_disk_type = master_disk_type
         self.master_disk_size = master_disk_size
@@ -350,7 +359,7 @@ class DataprocClusterCreateOperator(DataprocOperationBaseOperator):
                 'gceClusterConfig': {
                 },
                 'masterConfig': {
-                    'numInstances': 1,
+                    'numInstances': self.num_masters,
                     'machineTypeUri': master_type_uri,
                     'diskConfig': {
                         'bootDiskType': self.master_disk_type,
@@ -412,6 +421,9 @@ class DataprocClusterCreateOperator(DataprocOperationBaseOperator):
 
         if self.properties:
             cluster_data['config']['softwareConfig']['properties'] = self.properties
+
+        if self.optional_components:
+            cluster_data['config']['softwareConfig']['optionalComponents'] = self.optional_components
 
         cluster_data = self._build_lifecycle_config(cluster_data)
 
@@ -1095,18 +1107,25 @@ class DataprocWorkflowTemplateInstantiateOperator(DataprocOperationBaseOperator)
         For this to work, the service account making the request must have domain-wide
         delegation enabled.
     :type delegate_to: str
+    :param parameters: a map of parameters for Dataproc Template in key-value format:
+        map (key: string, value: string)
+        Example: { "date_from": "2019-08-01", "date_to": "2019-08-02"}.
+        Values may not exceed 100 characters. Please refer to:
+        https://cloud.google.com/dataproc/docs/concepts/workflows/workflow-parameters
+    :type parameters: Dict[str, str]
     """
 
     template_fields = ['template_id']
 
     @apply_defaults
-    def __init__(self, template_id, *args, **kwargs):
+    def __init__(self, template_id, parameters, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.template_id = template_id
+        self.parameters = parameters
 
     def start(self):
         """
-        Instantiate a WorkflowTemplate on Google Cloud Dataproc.
+        Instantiate a WorkflowTemplate on Google Cloud Dataproc with given parameters.
         """
         self.log.info('Instantiating Template: %s', self.template_id)
         return (
@@ -1114,7 +1133,7 @@ class DataprocWorkflowTemplateInstantiateOperator(DataprocOperationBaseOperator)
             .instantiate(
                 name=('projects/%s/regions/%s/workflowTemplates/%s' %
                       (self.project_id, self.region, self.template_id)),
-                body={'requestId': str(uuid.uuid4())})
+                body={'requestId': str(uuid.uuid4()), 'parameters': self.parameters})
             .execute())
 
 

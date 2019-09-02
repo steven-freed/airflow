@@ -28,6 +28,7 @@ from googleapiclient.errors import HttpError
 from airflow.contrib.hooks import bigquery_hook as hook
 from airflow.contrib.hooks.bigquery_hook import _cleanse_time_partitioning, \
     _validate_value, _api_resource_configs_duplication_check
+from tests.compat import PropertyMock
 
 bq_available = True
 
@@ -43,22 +44,35 @@ class TestPandasGbqPrivateKey(unittest.TestCase):
         if not bq_available:
             self.instance.extras['extra__google_cloud_platform__project'] = 'mock_project'
 
-    def test_key_path_provided(self):
+    @mock.patch(
+        'airflow.contrib.hooks.gcp_api_base_hook.GoogleCloudBaseHook.project_id',
+        new_callable=PropertyMock,
+        return_value=None
+    )
+    @mock.patch('airflow.contrib.hooks.bigquery_hook.read_gbq')
+    def test_key_path_provided(self, mock_read_gbq, mock_project_id):
         private_key_path = '/Fake/Path'
         self.instance.extras['extra__google_cloud_platform__key_path'] = private_key_path
 
-        with mock.patch('airflow.contrib.hooks.bigquery_hook.read_gbq',
-                        new=lambda *args, **kwargs: kwargs['private_key']):
+        self.instance.get_pandas_df('select 1')
 
-            self.assertEqual(self.instance.get_pandas_df('select 1'), private_key_path)
+        args, kwargs = mock_read_gbq.call_args
+        self.assertEqual(kwargs['private_key'], private_key_path)
 
-    def test_key_json_provided(self):
+    @mock.patch(
+        'airflow.contrib.hooks.gcp_api_base_hook.GoogleCloudBaseHook.project_id',
+        new_callable=PropertyMock,
+        return_value=None
+    )
+    @mock.patch('airflow.contrib.hooks.bigquery_hook.read_gbq')
+    def test_key_json_provided(self, mock_read_gbq, mock_project_id):
         private_key_json = 'Fake Private Key'
         self.instance.extras['extra__google_cloud_platform__keyfile_dict'] = private_key_json
 
-        with mock.patch('airflow.contrib.hooks.bigquery_hook.read_gbq', new=lambda *args,
-                        **kwargs: kwargs['private_key']):
-            self.assertEqual(self.instance.get_pandas_df('select 1'), private_key_json)
+        self.instance.get_pandas_df('select 1')
+
+        args, kwargs = mock_read_gbq.call_args
+        self.assertEqual(kwargs['private_key'], private_key_json)
 
     def test_no_key_provided(self):
         with mock.patch('airflow.contrib.hooks.bigquery_hook.read_gbq', new=lambda *args,
@@ -273,7 +287,7 @@ class TestBigQueryBaseCursor(unittest.TestCase):
 
         bq_hook.cancel_query()
 
-        mock_jobs.cancel.assert_called_with(projectId=project_id, jobId=running_job_id)
+        mock_jobs.cancel.assert_called_once_with(projectId=project_id, jobId=running_job_id)
 
     @mock.patch.object(hook.BigQueryBaseCursor, 'run_with_configuration')
     def test_run_query_sql_dialect_default(self, run_with_config):
@@ -368,8 +382,12 @@ class TestTableDataOperations(unittest.TestCase):
         }
         cursor = hook.BigQueryBaseCursor(mock_service, 'project_id')
         cursor.insert_all(project_id, dataset_id, table_id, rows)
-        method.assert_called_with(projectId=project_id, datasetId=dataset_id,
-                                  tableId=table_id, body=body)
+        method.assert_called_once_with(
+            projectId=project_id,
+            datasetId=dataset_id,
+            tableId=table_id,
+            body=body
+        )
 
     def test_insert_all_fail(self):
         project_id = 'bq-project'
@@ -702,6 +720,76 @@ class TestDatasetsOperations(unittest.TestCase):
                 mocked, "test_create_empty_dataset").get_datasets_list(
                 project_id=project_id)
             self.assertEqual(result, expected_result['datasets'])
+
+    def test_delete_dataset(self):
+        project_id = 'bq-project'
+        dataset_id = 'bq_dataset'
+        delete_contents = True
+
+        mock_service = mock.Mock()
+        method = mock_service.datasets.return_value.delete
+        cursor = hook.BigQueryBaseCursor(mock_service, project_id)
+        cursor.delete_dataset(project_id, dataset_id, delete_contents)
+
+        method.assert_called_once_with(projectId=project_id, datasetId=dataset_id,
+                                       deleteContents=delete_contents)
+
+    def test_patch_dataset(self):
+        dataset_resource = {
+            "access": [
+                {
+                    "role": "WRITER",
+                    "groupByEmail": "cloud-logs@google.com"
+                }
+            ]
+        }
+
+        dataset_id = "test_dataset"
+        project_id = "project_test"
+
+        mock_service = mock.Mock()
+        method = (mock_service.datasets.return_value.patch)
+        cursor = hook.BigQueryBaseCursor(mock_service, project_id)
+        cursor.patch_dataset(
+            dataset_id=dataset_id,
+            project_id=project_id,
+            dataset_resource=dataset_resource
+        )
+
+        method.assert_called_once_with(
+            projectId=project_id,
+            datasetId=dataset_id,
+            body=dataset_resource
+        )
+
+    def test_update_dataset(self):
+        dataset_resource = {
+            "kind": "bigquery#dataset",
+            "location": "US",
+            "id": "your-project:dataset_2_test",
+            "datasetReference": {
+                "projectId": "your-project",
+                "datasetId": "dataset_2_test"
+            }
+        }
+
+        dataset_id = "test_dataset"
+        project_id = "project_test"
+
+        mock_service = mock.Mock()
+        method = (mock_service.datasets.return_value.update)
+        cursor = hook.BigQueryBaseCursor(mock_service, project_id)
+        cursor.update_dataset(
+            dataset_id=dataset_id,
+            project_id=project_id,
+            dataset_resource=dataset_resource
+        )
+
+        method.assert_called_once_with(
+            projectId=project_id,
+            datasetId=dataset_id,
+            body=dataset_resource
+        )
 
 
 class TestTimePartitioningInRunJob(unittest.TestCase):
