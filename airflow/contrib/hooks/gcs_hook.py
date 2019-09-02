@@ -177,7 +177,7 @@ class GoogleCloudStorageHook(GoogleCloudBaseHook):
         return blob.download_as_string()
 
     def upload(self, bucket_name, object_name, filename=None,
-               data=None, content_type=None, gzip=False, encoding='utf-8'):
+               data=None, mime_type=None, gzip=False, encoding='utf-8'):
         """
         Uploads a local file or file data as string or bytes to Google Cloud Storage.
         :param bucket_name: The bucket to upload to.
@@ -188,8 +188,8 @@ class GoogleCloudStorageHook(GoogleCloudBaseHook):
         :type filename: str
         :param data: The file's data as a string or bytes to be uploaded.
         :type data: str
-        :param content_type: The file's content type set when uploading the file.
-        :type content_type: str
+        :param mime_type: The file's mime type set when uploading the file.
+        :type mime_type: str
         :param gzip: Option to compress local file or file data for upload
         :type gzip: bool
         :param encoding: bytes encoding for file data if provided as string
@@ -203,8 +203,8 @@ class GoogleCloudStorageHook(GoogleCloudBaseHook):
                             specify a single parameter, either 'filename' for
                             local file uploads or 'data' for file content uploads.""")
         elif filename:
-            if not content_type:
-                content_type = 'application/octet-stream'
+            if not mime_type:
+                mime_type = 'application/octet-stream'
             if gzip:
                 filename_gz = filename + '.gz'
 
@@ -214,13 +214,13 @@ class GoogleCloudStorageHook(GoogleCloudBaseHook):
                         filename = filename_gz
 
             blob.upload_from_filename(filename=filename,
-                                      content_type=content_type)
+                                      content_type=mime_type)
             if gzip:
                 os.remove(filename)
             self.log.info('File %s uploaded to %s in %s bucket', filename, object_name, bucket_name)
         elif data:
-            if not content_type:
-                content_type = 'text/plain'
+            if not mime_type:
+                mime_type = 'text/plain'
             if gzip:
                 if isinstance(data, str):
                     data = bytes(data, encoding)
@@ -228,7 +228,7 @@ class GoogleCloudStorageHook(GoogleCloudBaseHook):
                 with gz.GzipFile(fileobj=out, mode="w") as f:
                     f.write(data)
                 data = out.getvalue()
-            blob.upload_from_string(data, content_type=content_type)
+            blob.upload_from_string(data, content_type=mime_type)
             self.log.info('Data stream uploaded to %s in %s bucket', object_name, bucket_name)
         else:
             raise ValueError("""'filename' and 'data' parameter missing.
