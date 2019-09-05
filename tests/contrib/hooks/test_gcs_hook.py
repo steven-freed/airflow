@@ -629,7 +629,7 @@ class TestGoogleCloudStorageHookUpload(unittest.TestCase):
 
         self.assertIsNone(response)
         upload_method.assert_called_once_with(
-            self.testdata_str,
+            data=self.testdata_str,
             content_type='text/plain'
         )
         
@@ -639,7 +639,7 @@ class TestGoogleCloudStorageHookUpload(unittest.TestCase):
 
         self.assertIsNone(response)
         upload_method.assert_called_once_with(
-            self.testdata_bytes,
+            data=self.testdata_bytes,
             content_type='text/plain'
         )
 
