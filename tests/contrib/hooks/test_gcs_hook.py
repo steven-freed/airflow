@@ -619,7 +619,7 @@ class TestGoogleCloudStorageHookUpload(unittest.TestCase):
         test_bucket = 'test_bucket'
         test_object = 'test_object'
 
-        upload_method = mock_service.return_value.get_bucket.return_value\
+        upload_method = mock_service.return_value.get_bucket.return_value \
             .blob.return_value.upload_from_string
         upload_method.return_value = None
 
@@ -629,8 +629,7 @@ class TestGoogleCloudStorageHookUpload(unittest.TestCase):
 
         self.assertIsNone(response)
         upload_method.assert_called_once_with(
-            data=self.testdata_str,
-            content_type='text/plain'
+            data=self.testdata_str
         )
         
         response = self.gcs_hook.upload(test_bucket,  # pylint:disable=assignment-from-no-return
@@ -639,8 +638,7 @@ class TestGoogleCloudStorageHookUpload(unittest.TestCase):
 
         self.assertIsNone(response)
         upload_method.assert_called_once_with(
-            data=self.testdata_bytes,
-            content_type='text/plain'
+            data=self.testdata_bytes
         )
 
     @mock.patch(GCS_STRING.format('GoogleCloudStorageHook.get_conn'))
