@@ -232,7 +232,6 @@ class GoogleCloudStorageHook(GoogleCloudBaseHook):
                     f.write(data)
                 data = out.getvalue()
             res = blob.upload_from_string(data=data, content_type=mime_type)
-            self.log.info('RESPONSE => %s', res)
             self.log.info('Data stream uploaded to %s in %s bucket', object_name, bucket_name)
         else:
             raise ValueError("""'filename' and 'data' parameter missing.
