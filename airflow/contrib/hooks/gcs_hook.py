@@ -49,7 +49,7 @@ class GoogleCloudStorageHook(GoogleCloudBaseHook):
         super().__init__(google_cloud_storage_conn_id,
                          delegate_to)
 
-    def get_conn(self):
+   def get_conn(self):
         """
         Returns a Google Cloud Storage service object.
         """
@@ -238,7 +238,8 @@ class GoogleCloudStorageHook(GoogleCloudBaseHook):
                 with gz.GzipFile(fileobj=out, mode="w") as f:
                     f.write(data)
                 data = out.getvalue()
-            blob.upload_from_string(data=data,
+            
+            blob.upload_from_string(data,
                                     content_type=mime_type)
             self.log.info('Data stream uploaded to %s in %s bucket', object_name, bucket_name)
         else:
