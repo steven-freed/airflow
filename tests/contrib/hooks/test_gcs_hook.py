@@ -697,7 +697,7 @@ class TestSyncGcsHook(unittest.TestCase):
         with mock.patch(
             GCS_STRING.format("GoogleCloudBaseHook.__init__"), new=mock_base_gcp_hook_default_project_id
         ):
-            self.gcs_hook = gcs_hook.GoogleCloudStorageHook(google_cloud_storage_conn_id="test")
+        self.gcs_hook = gcs_hook.GoogleCloudStorageHook(google_cloud_storage_conn_id="test")
 
     @mock.patch(GCS_STRING.format("GoogleCloudStorageHook.copy"))
     @mock.patch(GCS_STRING.format("GoogleCloudStorageHook.rewrite"))
