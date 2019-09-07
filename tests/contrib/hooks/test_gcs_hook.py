@@ -692,11 +692,12 @@ class TestGoogleCloudStorageHookUpload(unittest.TestCase):
                           filename=self.testfile.name,
                           data=self.testdata_str)
 
+
 class TestSyncGcsHook(unittest.TestCase):
     def setUp(self):
         with mock.patch(
             GCS_STRING.format("GoogleCloudBaseHook.__init__"), new=mock_base_gcp_hook_default_project_id
-        ):
+            ):
         self.gcs_hook = gcs_hook.GoogleCloudStorageHook(google_cloud_storage_conn_id="test")
 
     @mock.patch(GCS_STRING.format("GoogleCloudStorageHook.copy"))
