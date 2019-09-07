@@ -49,7 +49,7 @@ class GoogleCloudStorageHook(GoogleCloudBaseHook):
         super().__init__(google_cloud_storage_conn_id,
                          delegate_to)
 
-   def get_conn(self):
+    def get_conn(self):
         """
         Returns a Google Cloud Storage service object.
         """
