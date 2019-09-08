@@ -624,7 +624,7 @@ class TestGoogleCloudStorageHookUpload(unittest.TestCase):
         test_bucket = 'test_bucket'
         test_object = 'test_object'
 
-        upload_method = mock_service.return_value.get_bucket.return_value\
+        upload_method = mock_service.return_value.bucket.return_value\
             .blob.return_value.upload_from_string
         upload_method.return_value = None
 
