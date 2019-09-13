@@ -651,7 +651,7 @@ class TestGoogleCloudStorageHookUpload(unittest.TestCase):
         test_bucket = 'test_bucket'
         test_object = 'test_object'
 
-        upload_method = mock_service.return_value.get_bucket.return_value\
+        upload_method = mock_service.return_value.bucket.return_value\
             .blob.return_value.upload_from_string
 
         self.gcs_hook.upload(test_bucket,
@@ -669,7 +669,7 @@ class TestGoogleCloudStorageHookUpload(unittest.TestCase):
         test_bucket = 'test_bucket'
         test_object = 'test_object'
 
-        upload_method = mock_service.return_value.get_bucket.return_value\
+        upload_method = mock_service.return_value.bucket.return_value\
             .blob.return_value.upload_from_string
 
         self.gcs_hook.upload(test_bucket,
@@ -694,14 +694,12 @@ class TestGoogleCloudStorageHookUpload(unittest.TestCase):
 
         with self.assertRaises(ValueError) as cm:
             self.gcs_hook.upload(test_bucket, test_object)
-        the_exception = cm.exception
-        self.assertEqual(no_params_excep, the_exception.message)
+        self.assertEqual(no_params_excep, str(cm.exception))
 
         with self.assertRaises(ValueError) as cm:
             self.gcs_hook.upload(test_bucket, test_object,
                                  filename=self.testfile.name, data=self.testdata_str)
-        the_exception = cm.exception
-        self.assertEqual(both_params_excep, the_exception.message)
+        self.assertEqual(both_params_excep, str(cm.exception))
 
 
 class TestSyncGcsHook(unittest.TestCase):
