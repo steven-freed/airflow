@@ -23,6 +23,7 @@ import tempfile
 import unittest
 import copy
 from datetime import datetime
+import gzip as gz
 
 import dateutil
 from google.cloud import storage
@@ -658,9 +659,15 @@ class TestGoogleCloudStorageHookUpload(unittest.TestCase):
                              test_object,
                              data=self.testdata_str,
                              gzip=True)
+ 
+        data = bytes(self.testdata_str, encoding)
+        out = BytesIO()
+        with gz.GzipFile(fileobj=out, mode="w") as f:
+            f.write(data)
+        data = out.getvalue()
 
         upload_method.assert_called_once_with(
-            self.testdata_str,
+            data,
             content_type='text/plain'
         )
 
@@ -677,8 +684,14 @@ class TestGoogleCloudStorageHookUpload(unittest.TestCase):
                              data=self.testdata_bytes,
                              gzip=True)
 
+        data = self.testdata_bytes
+        out = BytesIO()
+        with gz.GzipFile(fileobj=out, mode="w") as f:
+            f.write(data)
+        data = out.getvalue()
+
         upload_method.assert_called_once_with(
-            self.testdata_bytes,
+            data,
             content_type='text/plain'
         )
 
@@ -694,12 +707,12 @@ class TestGoogleCloudStorageHookUpload(unittest.TestCase):
 
         with self.assertRaises(ValueError) as cm:
             self.gcs_hook.upload(test_bucket, test_object)
-        self.assertEqual(no_params_excep, str(cm.exception))
+        self.assertEqual(no_params_excep, cm.exception.message)
 
         with self.assertRaises(ValueError) as cm:
             self.gcs_hook.upload(test_bucket, test_object,
                                  filename=self.testfile.name, data=self.testdata_str)
-        self.assertEqual(both_params_excep, str(cm.exception))
+        self.assertEqual(both_params_excep, cm.exception.message)
 
 
 class TestSyncGcsHook(unittest.TestCase):
