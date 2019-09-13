@@ -651,6 +651,7 @@ class TestGoogleCloudStorageHookUpload(unittest.TestCase):
     def test_upload_data_str_gzip(self, mock_service):
         test_bucket = 'test_bucket'
         test_object = 'test_object'
+        encoding = 'utf-8'
 
         upload_method = mock_service.return_value.bucket.return_value\
             .blob.return_value.upload_from_string
@@ -659,9 +660,9 @@ class TestGoogleCloudStorageHookUpload(unittest.TestCase):
                              test_object,
                              data=self.testdata_str,
                              gzip=True)
- 
+
         data = bytes(self.testdata_str, encoding)
-        out = BytesIO()
+        out = io.BytesIO()
         with gz.GzipFile(fileobj=out, mode="w") as f:
             f.write(data)
         data = out.getvalue()
@@ -685,7 +686,7 @@ class TestGoogleCloudStorageHookUpload(unittest.TestCase):
                              gzip=True)
 
         data = self.testdata_bytes
-        out = BytesIO()
+        out = io.BytesIO()
         with gz.GzipFile(fileobj=out, mode="w") as f:
             f.write(data)
         data = out.getvalue()
