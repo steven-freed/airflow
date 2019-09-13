@@ -660,8 +660,8 @@ class TestGoogleCloudStorageHookUpload(unittest.TestCase):
                              gzip=True)
 
         upload_method.assert_called_once_with(
-                self.testdata_str,
-                content_type='text/plain'
+            self.testdata_str,
+            content_type='text/plain'
         )
 
     @mock.patch(GCS_STRING.format('GoogleCloudStorageHook.get_conn'))
@@ -678,8 +678,8 @@ class TestGoogleCloudStorageHookUpload(unittest.TestCase):
                              gzip=True)
 
         upload_method.assert_called_once_with(
-                self.testdata_bytes,
-                content_type='text/plain'
+            self.testdata_bytes,
+            content_type='text/plain'
         )
 
     @mock.patch(GCS_STRING.format('GoogleCloudStorageHook.get_conn'))
