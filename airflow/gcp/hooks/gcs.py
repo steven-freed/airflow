@@ -20,10 +20,9 @@
 """
 This module contains a Google Cloud Storage hook.
 """
-from typing import Union
 import os
 from os import path
-from typing import Optional, Set, Tuple
+from typing import Optional, Set, Tuple, Union
 import gzip as gz
 import shutil
 from io import BytesIO
