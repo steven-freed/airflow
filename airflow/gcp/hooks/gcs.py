@@ -206,7 +206,7 @@ class GoogleCloudStorageHook(GoogleCloudBaseHook):
         :type gzip: bool
         :param encoding: bytes encoding for file data if provided as string
         :type encoding: str
-      	"""
+        """
         client = self.get_conn()
         bucket = client.bucket(bucket_name)
         blob = bucket.blob(blob_name=object_name)
