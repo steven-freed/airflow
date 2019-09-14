@@ -441,19 +441,23 @@ class GoogleCloudStorageHook(GoogleCloudBaseHook):
         :type resource: dict
         :param storage_class: This defines how objects in the bucket are stored
             and determines the SLA and the cost of storage. Values include
+
             - ``MULTI_REGIONAL``
             - ``REGIONAL``
             - ``STANDARD``
             - ``NEARLINE``
             - ``COLDLINE``.
+
             If this value is not specified when the bucket is
             created, it will default to STANDARD.
         :type storage_class: str
         :param location: The location of the bucket.
             Object data for objects in the bucket resides in physical storage
             within this region. Defaults to US.
+
             .. seealso::
                 https://developers.google.com/storage/docs/bucket-locations
+
         :type location: str
         :param project_id: The ID of the GCP Project.
         :type project_id: str
@@ -555,8 +559,10 @@ class GoogleCloudStorageHook(GoogleCloudBaseHook):
     def compose(self, bucket_name, source_objects, destination_object):
         """
         Composes a list of existing object into a new object in the same storage bucket_name
+
         Currently it only supports up to 32 objects that can be concatenated
         in a single operation
+
         https://cloud.google.com/storage/docs/json_api/v1/objects/compose
 
         :param bucket_name: The name of the bucket containing the source objects.
@@ -599,6 +605,7 @@ class GoogleCloudStorageHook(GoogleCloudBaseHook):
     ):
         """
         Synchronizes the contents of the buckets.
+
         Parameters ``source_object`` and ``destination_object`` describe the root sync directories. If they
         are not passed, the entire bucket will be synchronized. If they are passed, they should point
         to directories.
