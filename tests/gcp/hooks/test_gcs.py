@@ -700,11 +700,11 @@ class TestGoogleCloudStorageHookUpload(unittest.TestCase):
     def test_upload_exceptions(self, mock_service):
         test_bucket = 'test_bucket'
         test_object = 'test_object'
-        both_params_excep = """'filename' and 'data' parameter provided. Please
-                               specify a single parameter, either 'filename' for
-                               local file uploads or 'data' for file content uploads."""
-        no_params_excep = """'filename' and 'data' parameter missing.
-                             One is required to upload to gcs."""
+        both_params_excep = "'filename' and 'data' parameter provided. Please " \
+                            "specify a single parameter, either 'filename' for " \
+                            "local file uploads or 'data' for file content uploads."
+        no_params_excep = "'filename' and 'data' parameter missing. " \
+                          "One is required to upload to gcs."
 
         with self.assertRaises(ValueError) as cm:
             self.gcs_hook.upload(test_bucket, test_object)
