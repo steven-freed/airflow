@@ -185,6 +185,7 @@ class GoogleCloudStorageHook(GoogleCloudBaseHook):
                encoding: str = 'utf-8') -> None:
         """
         Uploads a local file or file data as string or bytes to Google Cloud Storage.
+
         :param bucket_name: The bucket to upload to.
         :type bucket_name: str
         :param object_name: The object name to set when uploading the file.
@@ -199,6 +200,7 @@ class GoogleCloudStorageHook(GoogleCloudBaseHook):
         :type gzip: bool
         :param encoding: bytes encoding for file data if provided as string
         :type encoding: str
+        :return: None
         """
         client = self.get_conn()
         bucket = client.bucket(bucket_name)
