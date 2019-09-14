@@ -64,6 +64,7 @@ class GoogleCloudStorageHook(GoogleCloudBaseHook):
              destination_object=None):
         """
         Copies an object from a bucket to another, with renaming if requested.
+
         destination_bucket or destination_object can be omitted, in which case
         source bucket/object is used, but not both.
 
@@ -110,6 +111,7 @@ class GoogleCloudStorageHook(GoogleCloudBaseHook):
         Has the same functionality as copy, except that will work on files
         over 5 TB, as well as when copying between locations and/or storage
         classes.
+
         destination_object can be omitted, in which case source_object is used.
 
         :param source_bucket: The bucket of the object to copy from.
@@ -160,6 +162,7 @@ class GoogleCloudStorageHook(GoogleCloudBaseHook):
     def download(self, bucket_name, object_name, filename=None):
         """
         Downloads a file from Google Cloud Storage.
+
         When no filename is supplied, the operator loads the file into memory and returns its
         content. When a filename is supplied, it writes the file to the specified location and
         returns the location. For file sizes that exceed the available memory it is recommended
@@ -196,14 +199,14 @@ class GoogleCloudStorageHook(GoogleCloudBaseHook):
         :param filename: The local file path to the file to be uploaded.
         :type filename: str
         :param data: The file's data as a string or bytes to be uploaded.
-        :type data: Union[str, bytes]
+        :type data: str
         :param mime_type: The file's mime type set when uploading the file.
         :type mime_type: str
         :param gzip: Option to compress local file or file data for upload
         :type gzip: bool
         :param encoding: bytes encoding for file data if provided as string
         :type encoding: str
-        """
+      	"""
         client = self.get_conn()
         bucket = client.bucket(bucket_name)
         blob = bucket.blob(blob_name=object_name)
@@ -366,6 +369,7 @@ class GoogleCloudStorageHook(GoogleCloudBaseHook):
         :param object_name: The name of the object to check in the Google
             cloud storage bucket_name.
         :type object_name: str
+
         """
         self.log.info('Checking the file size of object: %s in bucket_name: %s',
                       object_name,
@@ -631,8 +635,10 @@ class GoogleCloudStorageHook(GoogleCloudBaseHook):
         :type allow_overwrite: bool
         :param delete_extra_files: if True, deletes additional files from the source that not found in the
             destination. By default extra files are not deleted.
+
             .. note::
                 This option can delete data quickly if you specify the wrong source/destination combination.
+
         :type delete_extra_files: bool
         :return: none
         """
