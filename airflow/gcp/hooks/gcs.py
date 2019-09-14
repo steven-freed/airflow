@@ -192,7 +192,7 @@ class GoogleCloudStorageHook(GoogleCloudBaseHook):
         :param filename: The local file path to the file to be uploaded.
         :type filename: str
         :param data: The file's data as a string or bytes to be uploaded.
-        :type data: str
+        :type data: Union[str, bytes]
         :param mime_type: The file's mime type set when uploading the file.
         :type mime_type: str
         :param gzip: Option to compress local file or file data for upload
