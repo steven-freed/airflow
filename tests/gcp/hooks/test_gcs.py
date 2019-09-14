@@ -708,12 +708,12 @@ class TestGoogleCloudStorageHookUpload(unittest.TestCase):
 
         with self.assertRaises(ValueError) as cm:
             self.gcs_hook.upload(test_bucket, test_object)
-        self.assertEqual(no_params_excep, cm.exception.message)
+        self.assertEqual(no_params_excep, cm.exception)
 
         with self.assertRaises(ValueError) as cm:
             self.gcs_hook.upload(test_bucket, test_object,
                                  filename=self.testfile.name, data=self.testdata_str)
-        self.assertEqual(both_params_excep, cm.exception.message)
+        self.assertEqual(both_params_excep, cm.exception)
 
 
 class TestSyncGcsHook(unittest.TestCase):
