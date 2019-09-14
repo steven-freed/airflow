@@ -207,8 +207,8 @@ class GoogleCloudStorageHook(GoogleCloudBaseHook):
         bucket = client.bucket(bucket_name)
         blob = bucket.blob(blob_name=object_name)
         if filename and data:
-            raise ValueError("'filename' and 'data' parameter provided. Please " \
-                            "specify a single parameter, either 'filename' for " \
+            raise ValueError("'filename' and 'data' parameter provided. Please "
+                            "specify a single parameter, either 'filename' for "
                             "local file uploads or 'data' for file content uploads.")
         elif filename:
             if not mime_type:
@@ -240,7 +240,7 @@ class GoogleCloudStorageHook(GoogleCloudBaseHook):
                                     content_type=mime_type)
             self.log.info('Data stream uploaded to %s in %s bucket', object_name, bucket_name)
         else:
-            raise ValueError("'filename' and 'data' parameter missing. " \
+            raise ValueError("'filename' and 'data' parameter missing. "
                             "One is required to upload to gcs.")
 
     def exists(self, bucket_name, object_name):
